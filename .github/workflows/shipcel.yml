@@ -1,0 +1,25 @@
+# Deploys this repository with Shipcel (https://shipcel.com): every push builds here, on GitHub,
+# and deploys to your Cloudflare account. The production branch goes to production; other
+# branches get a preview. The run signs in with GitHub's own token: no secret is stored.
+name: Shipcel
+on:
+  push:
+    branches: ['**']
+  workflow_dispatch:
+permissions:
+  contents: read
+  id-token: write
+concurrency:
+  group: shipcel-${{ github.ref }}
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          package-manager-cache: false
+      - run: npx --yes --package=https://shipcel.com/cli/shipcel.tgz shipcel deploy
+        env:
+          SHIPCEL_URL: https://shipcel.com
